@@ -31,8 +31,8 @@ $PY -I tools/tv.py "settings put global window_animation_scale 0.5; settings put
 echo "--> Restricting background hotword polling for Katniss..."
 $PY -I tools/tv.py "cmd appops set com.google.android.katniss RUN_IN_BACKGROUND ignore; cmd appops set com.google.android.katniss RUN_ANY_IN_BACKGROUND ignore" >/dev/null
 
-# 4. AOT native compile heavy streaming apps
-PACKAGES=("com.sling" "com.google.android.youtube.tv" "com.netflix.ninja" "com.amazon.amazonvideo.livingroom")
+# 4. AOT native compile launcher and heavy streaming apps
+PACKAGES=("com.gathin.tvhome" "com.sling" "com.google.android.youtube.tv" "com.netflix.ninja" "com.amazon.amazonvideo.livingroom")
 for PKG in "${PACKAGES[@]}"; do
     INSTALLED=$($PY -I tools/tv.py "pm list packages $PKG" 2>/dev/null || true)
     if [[ "$INSTALLED" == *"$PKG"* ]]; then

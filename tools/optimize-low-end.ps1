@@ -31,8 +31,8 @@ Write-Host "Setting snappy UI animation scales (0.5x)..."
 Write-Host "Restricting background hotword polling for Katniss..."
 & $py -I "$PSScriptRoot\tv.py" "cmd appops set com.google.android.katniss RUN_IN_BACKGROUND ignore; cmd appops set com.google.android.katniss RUN_ANY_IN_BACKGROUND ignore" | Out-Null
 
-# 4. AOT native compile heavy streaming apps if installed
-$packages = @("com.sling", "com.google.android.youtube.tv", "com.netflix.ninja", "com.amazon.amazonvideo.livingroom")
+# 4. AOT native compile launcher and heavy streaming apps if installed
+$packages = @("com.gathin.tvhome", "com.sling", "com.google.android.youtube.tv", "com.netflix.ninja", "com.amazon.amazonvideo.livingroom")
 foreach ($pkg in $packages) {
     Write-Host "Checking $pkg for ahead-of-time (AOT) speed compilation..."
     $installed = & $py -I "$PSScriptRoot\tv.py" "pm list packages $pkg"

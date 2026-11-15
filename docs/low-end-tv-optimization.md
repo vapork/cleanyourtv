@@ -99,7 +99,8 @@ By default, Android TV uses a Just-In-Time (JIT) compiler with profile-guided co
 Compile heavy streaming apps to native ARM machine instructions ahead of time:
 
 ```bash
-# Precompile Sling TV to native ARM machine instructions:
+# Precompile the launcher and Sling TV to native ARM machine instructions:
+adb shell cmd package compile -m speed -f com.gathin.tvhome
 adb shell cmd package compile -m speed -f com.sling
 
 # Optional: Precompile other heavy media apps:
