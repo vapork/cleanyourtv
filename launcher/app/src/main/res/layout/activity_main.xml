@@ -233,6 +233,19 @@
                         android:letterSpacing="0.08"
                         android:textAllCaps="true" />
 
+                    <TextView
+                        android:id="@+id/clockWeather"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="10dp"
+                        android:layout_gravity="bottom"
+                        android:layout_marginBottom="7dp"
+                        android:textColor="#FFFFFFFF"
+                        android:textSize="18sp"
+                        android:fontFamily="@string/font_regular"
+                        android:includeFontPadding="false"
+                        android:visibility="gone" />
+
                     <View
                         android:id="@+id/clockDivider"
                         android:layout_width="1dp"

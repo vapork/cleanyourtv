@@ -97,6 +97,7 @@ final class ClockScene {
         handler.removeCallbacks(tick);
         handler.postDelayed(tick, MOVE_MS);
         clockRefresh.start();
+        LiveWeather.bind(content.findViewById(R.id.dreamWeather));
         if (wallpaperFile != null && !wallpaperShown) loadWallpaper();
     }
 
