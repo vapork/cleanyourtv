@@ -110,20 +110,21 @@ phoning home, no apps you never asked for.
 | ![Moving a tile: held OK, chose Move, the tile is picked up and the others dim](docs/tile-move.jpg) | ![The App library: installed apps, one press adds an app back to Home](docs/app-library.jpg) |
 | *Hold OK on a tile, Move: arrows carry it, Back puts it down* | *App library: one press puts a removed app back on Home* |
 
-## Tailored for Low-End & Budget TVs (1 GB – 2 GB RAM)
+## Tailored for Low-End TVs & High-Performance Streaming Devices
 
-Most budget TVs (TCL 4-Series, Xiaomi, Hisense, Fire TV, Onn) run on quad-core Cortex-A53 chips with only 1 to 2 GB of RAM. The hardware video decoders and GPU reserve nearly half the RAM, leaving only **~520–550 MB** for apps.
+Whether running on budget 1–2 GB sets (TCL 4-Series, Xiaomi, Hisense) or high-performance 3 GB boxes (Walmart Onn 4K Pro, Amlogic S905X4 on Android 14), background bloat and unoptimized services choke navigation and video streaming.
 
-This branch includes a complete low-end TV optimization suite tested and verified on real hardware:
+This branch includes an optimization suite tested and verified on real hardware:
 
-- **3.2x Faster Rendering**: 50th percentile frame times dropped from 61 ms down to 19 ms.
+- **3.2x Faster Rendering**: 50th percentile frame times dropped from 61 ms down to 19 ms on budget 2 GB sets; 99th percentile worst frames cut from 150 ms to 69 ms on 3 GB boxes.
 - **93.8% Reduction in Freezes**: UI thread freezes (>700 ms) dropped from 226 down to 14.
+- **Audio HAL Loop Eliminated**: Saves ~25% CPU on Amlogic devices (Onn 4K Pro) by cutting the Dolby MS12 software transcoding loop from 32% down to 5.8% CPU.
 - **Live Weather Integration**: Real-time Open-Meteo weather readout (`· 49°F ⛅`) directly beside the clock on Home and screensaver, polling silently off-thread with zero ads.
-- **Process Memory Cap**: Limits background processes to 1 so streaming apps (Sling, Netflix, YouTube) get the entire 550 MB sandbox to themselves.
-- **Telemetry Sinkhole Fix**: Resolves severe 171% CPU loops on network adblockers (AdGuard Home / Pi-hole) by documenting NXDOMAIN failovers for streaming analytics.
+- **Process Memory Cap**: Limits background processes to 1 so streaming apps (Sling, Netflix, YouTube) get the entire app heap to themselves without minimized apps burning 100%+ background CPU.
+- **Telemetry Sinkhole & Ad-Blocker Fix**: Resolves severe 171% CPU loops on network adblockers (AdGuard Home / Pi-hole) by documenting client-specific NXDOMAIN failovers for streaming analytics (Conviva, MoveTV, Dynatrace).
 - **Native AOT Speed Compilation**: Ahead-of-time ARM compilation for instant app startup.
 
-👉 **Read the full engineering guide:** [Low-End Android TV Optimization Guide](docs/low-end-tv-optimization.md)  
+👉 **Read the full engineering guide:** [Android TV Optimization Guide](docs/low-end-tv-optimization.md)  
 ⚡ **Apply in one command:** `powershell -File .\tools\optimize-low-end.ps1 -TvHost <IP>` or `bash tools/optimize-low-end.sh <IP>`
 
 ## Supported TVs

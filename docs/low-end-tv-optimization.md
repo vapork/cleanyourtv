@@ -1,7 +1,10 @@
-# Low-End Android TV Optimization Guide
+# Android TV & Streaming Device Optimization Guide
 
-> **Tested and verified on:** TCL 43S434 (Realtek RTD2851, 2 GB RAM, Android TV 11 AR05 / V8-R851T02-LF1V728).  
-> **Applies to:** Any 1 GB – 2 GB Android TV or Google TV set (TCL, Xiaomi, Hisense, Sony, Philips, Onn, Fire TV) powered by Realtek (RTD2851/RTD287x), Amlogic (S905X/W), or MediaTek budget SoCs.
+> **Tested and verified on real hardware:**
+> - **Budget TV (2 GB RAM):** TCL 43S434 (Realtek RTD2851, Android TV 11 AR05 / V8-R851T02-LF1V728).
+> - **High-Performance Box (3 GB RAM):** Walmart Onn. Streaming Device 4K Pro (Amlogic S905X4, Google TV 14 URO4.260304.092).
+> 
+> **Applies to:** Any 1 GB – 3 GB Android TV, Google TV, or Fire TV set/box (TCL, Xiaomi, Hisense, Sony, Philips, Onn, Nvidia Shield, Fire TV) powered by Realtek, Amlogic, or MediaTek SoCs.
 
 ---
 
@@ -127,7 +130,56 @@ tools/disable.sh examples/tcl-43s434/debloat.txt
 
 ---
 
-## 4. Automation Script
+## 4. High-Performance Streaming Boxes (Walmart Onn 4K Pro, Amlogic S905X4 on Android 14)
+
+Even higher-end devices with 3 GB of RAM can suffer from severe lag after major updates like Google TV 14 (Build `URO4.260304.092`). Our live diagnostics on the **Walmart Onn 4K Pro** revealed three distinct bottlenecks:
+
+### Live Before vs. After Benchmarks (Onn 4K Pro)
+
+| Metric | Stock State (Before) | Optimized State (After) | Improvement |
+|---|---|---|---|
+| **Audio Service CPU (`audio.service-droidlogic`)** | **~28% – 32% CPU** | **5.8% CPU** | **~25% CPU freed up immediately** (Dolby MS12 software loop killed) |
+| **Sling 99th Percentile Worst Frame** | **150 ms** | **69 ms** | **2.2x Faster rendering (smoother motion)** |
+| **Sling Janky Frame Rate** | **9.16%** | **6.52%** | **~29% reduction in dropped frames** |
+| **Slow UI Thread Freezes** | **22 events** | **10 events** | **54.5% Reduction in UI thread lockups** |
+| **Remote Input Latency Events** | **964 delayed events** | **441 delayed events** | **54.3% Reduction in remote input lag** |
+| **Raw Free Memory** | ~286 MB | **~415 MB – 445 MB** | **+130 MB to +160 MB more RAM** (~1.38 GB available) |
+| **System Idle CPU Capacity** | **~8% – 20% idle** | **170% – 240% idle** | **Massive CPU headroom restored** |
+
+### Key Optimizations for Onn 4K Pro:
+
+1. **Kill the Dolby MS12 Audio Transcoding Loop (Saves ~25% CPU):**
+   - On stock settings, *Surround sound* defaults to **Automatic**, forcing the CPU to continuously run Dolby Multistream 12 (`DOLBY_MS12`) transcoding.
+   - Go to **Settings → Display & Sound → Advanced sound settings → Surround sound**:
+     - If using TV speakers or a 2.0/2.1 setup, select **None (Never use surround sound)**.
+     - If using an external surround soundbar or AVR, select **Manual**.
+   - *Result:* Drops `audio.service-droidlogic` from ~32% down to **5.8% CPU** while keeping the always-on microphone 100% active.
+
+2. **Cap Background Streaming Leaks:**
+   - In Android 14, minimized apps like Sling continue decoding at 100%+ CPU in the background when you press Home.
+   - Enforce process limit and background restrictions:
+     ```bash
+     adb shell settings put global standard_background_process_limit 1
+     adb shell cmd appops set com.sling RUN_IN_BACKGROUND ignore
+     adb shell cmd appops set com.sling RUN_ANY_IN_BACKGROUND ignore
+     ```
+
+3. **Client-Specific Ad-Blocker Allowlist Rules:**
+   - Lock telemetry allowlists specifically to your streaming device IPs in AdGuard Home or Pi-hole:
+     ```text
+     @@||cws.conviva.com^$client=<TV_IP>
+     @@||movetv.com^$client=<TV_IP>
+     @@||bf.dynatrace.com^$client=<TV_IP>
+     ```
+   - *Zero ad impact:* None of these domains serve commercial ads. Conviva monitors video bitrate/QoE, MoveTV delivers Sling channel posters (`p-img.movetv.com`), and Dynatrace monitors app crash stack traces.
+
+4. **The ASR / AI Super Resolution Reality:**
+   - In Android 14, the `AI-PQ/AI-SR` toggle in Amlogic's hidden settings is grayed out on the Onn 4K Pro because the S905X4 lacks the dedicated on-chip NPU of the newer S905X5 generation.
+   - However, the S905X4's hardware Video Processing Unit (VPU) automatically performs bicubic 4K60 upscaling in silicon with 0% CPU overhead. High-end TVs (such as the TCL QM8 Mini-LED) will further enhance the incoming 4K feed using their own dedicated AIPQ deep-learning engines.
+
+---
+
+## 5. Automation Script
 
 To apply all system-level optimizations (process limits, AppOps restrictions, and AOT compilation) in one pass, run:
 
